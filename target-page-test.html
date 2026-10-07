@@ -1,0 +1,839 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Desafios - Sistema Comercial</title>
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+
+    <style>
+        body {
+            background-color: #f5f6f8;
+        }
+
+        .section-card {
+            border: 0;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, .08);
+        }
+
+        .section-title {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .result-card {
+            border-left: 4px solid #0d6efd;
+        }
+
+        .estoque-quantidade {
+            font-size: 1.4rem;
+            font-weight: 600;
+        }
+
+        .table-responsive {
+            max-height: 450px;
+        }
+
+        .upload-area {
+            border: 2px dashed #ced4da;
+            border-radius: 10px;
+            padding: 25px;
+            text-align: center;
+            background-color: #fff;
+        }
+
+        .upload-area:hover {
+            border-color: #0d6efd;
+            background-color: #f8fbff;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container py-4">
+
+        <!-- ========================================================= -->
+        <!-- CABEÇALHO -->
+        <!-- ========================================================= -->
+
+        <div class="mb-4">
+            <h1 class="fw-bold">
+                <i class="bi bi-code-square"></i>
+                Desafios
+            </h1>
+
+            <p class="text-secondary mb-0">
+                Sistema para cálculo de comissão, movimentação de estoque e juros.
+            </p>
+        </div>
+
+
+        <!-- ========================================================= -->
+        <!-- DESAFIO 1 - COMISSÕES -->
+        <!-- ========================================================= -->
+
+        <div class="card section-card mb-4">
+
+            <div class="card-header bg-primary text-white">
+                <div class="section-title">
+                    <i class="bi bi-cash-coin"></i>
+                    <strong>Desafio 1 — Comissão dos vendedores</strong>
+                </div>
+            </div>
+
+            <div class="card-body">
+
+                <div class="alert alert-info">
+                    <i class="bi bi-info-circle"></i>
+
+                    Envie um arquivo JSON contendo os registros de vendas.
+                    O sistema irá calcular automaticamente a comissão de cada venda
+                    e consolidar o resultado por vendedor.
+                </div>
+
+
+                <!-- Upload -->
+                <div class="upload-area mb-3">
+                    <i class="bi bi-filetype-json fs-1 text-primary"></i>
+                    <h5 class="mt-2">Selecione o arquivo JSON</h5>
+
+                    <p class="text-secondary small">
+                        O arquivo será lido somente no navegador e o campo será
+                        limpo após o processamento.
+                    </p>
+
+                    <input type="file" class="form-control" id="arquivoVendas" accept=".json,application/json">
+
+                    <div id="erroArquivoVendas" class="invalid-feedback text-start"></div>
+                </div>
+
+                <!-- Alertas -->
+                <div id="alertaVendas"></div>
+
+                <!-- Resultado -->
+                <div id="resultadoVendas" class="d-none">
+                    <div class="row mb-3">
+                        <div class="col-md-4 mb-3">
+                            <div class="card result-card h-100">
+                                <div class="card-body">
+                                    <small class="text-secondary">Total de vendedores</small>
+
+                                    <div id="totalVendedores" class="fs-3 fw-bold">0</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-md-4 mb-3">
+                            <div class="card result-card h-100">
+                                <div class="card-body">
+                                    <small class="text-secondary">Total de vendas</small>
+
+                                    <div id="totalVendas" class="fs-3 fw-bold">0</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-md-4 mb-3">
+                            <div class="card result-card h-100">
+                                <div class="card-body">
+                                    <small class="text-secondary">Total de comissão</small>
+
+                                    <div id="totalComissao" class="fs-3 fw-bold text-success">R$ 0,00
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <h5 class="mb-3">
+                        <i class="bi bi-people"></i>
+                        Resultado por vendedor
+                    </h5>
+
+                    <div class="table-responsive">
+                        <table class="table table-hover align-middle">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>Vendedor</th>
+                                    <th class="text-center">Vendas</th>
+                                    <th class="text-end">Total vendido</th>
+                                    <th class="text-end">Comissão</th>
+                                </tr>
+                            </thead>
+
+                            <tbody id="tabelaVendedores"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ========================================================= -->
+        <!-- DESAFIO 2 - ESTOQUE -->
+        <!-- ========================================================= -->
+
+        <div class="card section-card mb-4">
+            <div class="card-header bg-success text-white">
+                <div class="section-title">
+                    <i class="bi bi-box-seam"></i>
+                    <strong>Desafio 2 — Movimentação de estoque</strong>
+                </div>
+            </div>
+
+            <div class="card-body">
+
+                <div class="alert alert-info">
+                    <i class="bi bi-info-circle"></i>
+
+                    Realize entradas e saídas dos produtos disponíveis no estoque.
+                    Cada movimentação recebe automaticamente um identificador único.
+                </div>
+
+                <!-- Produtos -->
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label for="produtoEstoque" class="form-label">Produto</label>
+                        <select id="produtoEstoque" class="form-select">
+                            <option value="">Selecione um produto</option>
+                        </select>
+
+                        <div class="invalid-feedback">
+                            Selecione um produto.
+                        </div>
+                    </div>
+
+                    <div class="col-md-3 mb-3">
+                        <label for="tipoMovimentacao" class="form-label">Movimentação</label>
+                        <select id="tipoMovimentacao" class="form-select">
+                            <option value="">Selecione</option>
+                            <option value="entrada">Entrada</option>
+                            <option value="saida">Saída</option>
+                        </select>
+
+                        <div class="invalid-feedback">
+                            Selecione o tipo de movimentação.
+                        </div>
+                    </div>
+
+                    <div class="col-md-3 mb-3">
+                        <label for="quantidadeMovimentacao" class="form-label">Quantidade</label>
+                        <input type="number" id="quantidadeMovimentacao" class="form-control" min="1" step="1">
+
+                        <div class="invalid-feedback">
+                            Informe uma quantidade válida.
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Descrição -->
+                <div class="mb-3">
+                    <label for="descricaoMovimentacao" class="form-label">Descrição da movimentação</label>
+                    <input type="text" id="descricaoMovimentacao" class="form-control" placeholder="Ex.: Compra de mercadoria, venda, ajuste...">
+
+                    <div class="invalid-feedback">
+                        Informe uma descrição.
+                    </div>
+                </div>
+
+                <button type="button" id="btnMovimentar" class="btn btn-success">
+                    <i class="bi bi-arrow-left-right"></i>
+                    Registrar movimentação
+                </button>
+
+                <div id="alertaEstoque" class="mt-3"></div>
+
+                <!-- Estoque atual -->
+                <div class="mt-4">
+                    <h5><i class="bi bi-boxes"></i> Estoque atual</h5>
+
+                    <div id="cardsEstoque" class="row"></div>
+                </div>
+
+                <!-- Histórico -->
+                <div class="mt-4">
+                    <h5><i class="bi bi-clock-history"></i> Histórico de movimentações</h5>
+
+                    <div class="table-responsive">
+                        <table class="table table-hover align-middle">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>ID</th>
+                                    <th>Produto</th>
+                                    <th>Tipo</th>
+                                    <th>Quantidade</th>
+                                    <th>Descrição</th>
+                                    <th>Estoque final</th>
+                                </tr>
+                            </thead>
+
+                            <tbody id="tabelaMovimentacoes"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ========================================================= -->
+        <!-- DESAFIO 3 - JUROS -->
+        <!-- ========================================================= -->
+
+        <div class="card section-card mb-4">
+            <div class="card-header bg-warning">
+                <div class="section-title">
+                    <i class="bi bi-calendar2-x"></i>
+
+                    <strong>
+                        Desafio 3 — Cálculo de juros
+                    </strong>
+                </div>
+            </div>
+
+            <div class="card-body">
+                <div class="alert alert-info">
+                    <i class="bi bi-info-circle"></i>
+
+                    Informe o valor da dívida e a data de vencimento.
+                    O sistema considera uma multa de <strong>2,5% ao dia</strong>
+                    sobre o valor original.
+                </div>
+
+
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label for="valorDivida" class="form-label">Valor</label>
+                        <div class="input-group">
+                            <span class="input-group-text">R$</span>
+
+                            <input type="number" id="valorDivida" class="form-control" min="0" step="0.01" placeholder="0,00">
+                        </div>
+
+                        <div class="invalid-feedback">Informe um valor válido.</div>
+                    </div>
+
+                    <div class="col-md-6 mb-3">
+                        <label for="dataVencimento" class="form-label">Data de vencimento</label>
+                        <input type="date" id="dataVencimento" class="form-control">
+
+                        <div class="invalid-feedback">Informe a data de vencimento.</div>
+                    </div>
+                </div>
+
+                <button type="button" id="btnCalcularJuros" class="btn btn-warning">
+                    <i class="bi bi-calculator"></i>
+                    Calcular juros
+                </button>
+
+                <div id="alertaJuros" class="mt-3"></div>
+
+                <!-- Resultado -->
+                <div id="resultadoJuros" class="d-none mt-4">
+                    <div class="row">
+                        <div class="col-md-3 mb-3">
+                            <div class="card h-100">
+                                <div class="card-body">
+                                    <small class="text-secondary">Valor original</small>
+
+                                    <div id="resultadoValorOriginal" class="fs-4 fw-bold">R$ 0,00</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-md-3 mb-3">
+                            <div class="card h-100">
+                                <div class="card-body">
+                                    <small class="text-secondary">Dias em atraso</small>
+
+                                    <div id="resultadoDias" class="fs-4 fw-bold">0</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-md-3 mb-3">
+                            <div class="card h-100">
+                                <div class="card-body">
+                                    <small class="text-secondary">Juros / multa</small>
+
+                                    <div id="resultadoJurosValor" class="fs-4 fw-bold text-danger" >R$ 0,00</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-md-3 mb-3">
+                            <div class="card h-100 border-success">
+                                <div class="card-body">
+                                    <small class="text-secondary">Valor atualizado</small>
+
+                                    <div id="resultadoValorFinal" class="fs-4 fw-bold text-success">R$ 0,00 </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        /* =========================================================
+        CONFIGURAÇÕES
+        ========================================================= */
+
+        const TAXA_JUROS_DIA = 0.025;
+
+        /* =========================================================
+        FUNÇÕES UTILITÁRIAS
+        ========================================================= */
+
+        function formatarMoeda(valor) {
+            return new Intl.NumberFormat('pt-BR', {
+                style: 'currency',
+                currency: 'BRL'
+            }).format(valor);
+        }
+
+        function mostrarAlerta(elemento, mensagem, tipo = 'danger') {
+            elemento.innerHTML = `
+                <div class="alert alert-${tipo} alert-dismissible fade show">
+                    <i class="bi bi-exclamation-triangle"></i>
+                    ${mensagem}
+
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+            `;
+        }
+
+        function limparAlerta(elemento) {
+            elemento.innerHTML = '';
+        }
+
+        function limparValidacao(elemento) {
+            elemento.classList.remove('is-invalid');
+            elemento.classList.remove('is-valid');
+        }
+
+        /* =========================================================
+        DESAFIO 1
+        COMISSÕES
+        ========================================================= */
+
+        const arquivoVendas   = document.getElementById('arquivoVendas');
+        const alertaVendas    = document.getElementById('alertaVendas');
+        const resultadoVendas = document.getElementById('resultadoVendas');
+
+
+        arquivoVendas.addEventListener('change', function(event) {
+            const arquivo = event.target.files[0];
+
+            limparAlerta(alertaVendas);
+
+            resultadoVendas.classList.add('d-none');
+
+            if (!arquivo) {
+                return;
+            }
+
+            if (arquivo.type !== 'application/json' && !arquivo.name.toLowerCase().endsWith('.json')) {
+                mostrarAlerta(alertaVendas, 'Selecione um arquivo JSON válido.');
+                arquivoVendas.value = '';
+
+                return;
+            }
+
+            const reader = new FileReader();
+
+            reader.onload = function(e) {
+                try {
+                    const dados = JSON.parse(e.target.result);
+
+                    validarDadosVendas(dados);
+                    processarVendas(dados.vendas);
+                } catch (erro) {
+                    mostrarAlerta(alertaVendas, `Não foi possível processar o arquivo: ${erro.message}`);
+                } finally {
+                    // Limpa o arquivo do input
+                    arquivoVendas.value = '';
+                }
+            };
+
+            reader.onerror = function() {
+                mostrarAlerta(alertaVendas, 'Erro ao ler o arquivo.');
+
+                arquivoVendas.value = '';
+            };
+
+            reader.readAsText(arquivo);
+        });
+
+        function validarDadosVendas(dados) {
+            if (!dados || typeof dados !== 'object') {
+                throw new Error('O conteúdo do arquivo não é um objeto JSON válido.');
+            }
+
+            if (!Array.isArray(dados.vendas)) {
+                throw new Error('O JSON deve possuir uma propriedade "vendas" contendo uma lista.');
+            }
+
+            if (dados.vendas.length === 0) {
+                throw new Error('O arquivo não possui nenhuma venda.');
+            }
+
+            dados.vendas.forEach((venda, index) => {
+                if (!venda || typeof venda.vendedor !== 'string' || venda.vendedor.trim() === '') {
+                    throw new Error(`A venda ${index + 1} possui um vendedor inválido.`);
+                }
+
+                if (typeof venda.valor !== 'number' || !Number.isFinite(venda.valor) || venda.valor < 0) {
+                    throw new Error(`A venda ${index + 1} possui um valor inválido.`);
+                }
+            });
+        }
+
+        function calcularComissao(valor) {
+            if (valor < 100) {
+                return 0;
+            }
+
+            if (valor < 500) {
+                return valor * 0.01;
+            }
+
+            return valor * 0.05;
+        }
+
+        function processarVendas(vendas) {
+            const vendedores = {};
+
+            let totalComissao = 0;
+            let totalVendido = 0;
+
+            vendas.forEach(venda => {
+                const nome = venda.vendedor.trim();
+                const valor = Number(venda.valor);
+                const comissao = calcularComissao(valor);
+
+                if (!vendedores[nome]) {
+                    vendedores[nome] = {
+                        vendas: 0,
+                        total: 0,
+                        comissao: 0
+                    };
+                }
+
+                vendedores[nome].vendas++;
+                vendedores[nome].total += valor;
+                vendedores[nome].comissao += comissao;
+
+                totalComissao += comissao;
+                totalVendido += valor;
+            });
+
+            document.getElementById('totalVendedores').textContent = Object.keys(vendedores).length;
+            document.getElementById('totalVendas').textContent     = vendas.length;
+            document.getElementById('totalComissao').textContent   = formatarMoeda(totalComissao);
+
+            const tbody = document.getElementById('tabelaVendedores');
+
+            tbody.innerHTML = '';
+
+            Object.entries(vendedores).forEach(([nome, dados]) => {
+                const tr = document.createElement('tr');
+
+                tr.innerHTML = `
+                    <td><strong>${nome}</strong></td>
+                    <td class="text-center">${dados.vendas}</td>
+                    <td class="text-end">${formatarMoeda(dados.total)}</td>
+
+                    <td class="text-end">
+                        <span class="badge text-bg-success fs-6">
+                            ${formatarMoeda(dados.comissao)}
+                        </span>
+                    </td>
+                `;
+
+                tbody.appendChild(tr);
+            });
+
+            resultadoVendas.classList.remove('d-none');
+
+            mostrarAlerta(alertaVendas,
+                `
+                    <strong>Processamento concluído!</strong>
+                    Foram processadas ${vendas.length} vendas,
+                    totalizando ${formatarMoeda(totalVendido)}
+                    em vendas.
+                `, 'success'
+            );
+
+        }
+
+        /* =========================================================
+        DESAFIO 2
+        ESTOQUE
+        ========================================================= */
+
+
+        let estoque = [
+            {codigoProduto: 101,descricaoProduto: 'Caneta Azul',estoque: 150},
+            {codigoProduto: 102,descricaoProduto: 'Caderno Universitário',estoque: 75},
+            {codigoProduto: 103,descricaoProduto: 'Borracha Branca',estoque: 200},
+            {codigoProduto: 104,descricaoProduto: 'Lápis Preto HB',estoque: 320},
+            {codigoProduto: 105,descricaoProduto: 'Marcador de Texto Amarelo',estoque: 90}
+        ];
+
+        let movimentacoes = [];
+        let proximoIdMovimentacao = 1;
+
+        const produtoEstoque = document.getElementById('produtoEstoque');
+
+        function carregarProdutos() {
+            produtoEstoque.innerHTML = `<option value="">
+                    Selecione um produto
+                </option>
+            `;
+
+            estoque.forEach(produto => {
+                const option = document.createElement('option');
+                option.value = produto.codigoProduto;
+                option.textContent = `${produto.codigoProduto} - ${produto.descricaoProduto}`;
+
+                produtoEstoque.appendChild(option);
+            });
+        }
+
+        function renderizarEstoque() {
+            const container = document.getElementById('cardsEstoque');
+            container.innerHTML = '';
+
+            estoque.forEach(produto => {
+                const col = document.createElement('div');
+
+                col.className = 'col-md-4 col-lg-3 mb-3';
+                col.innerHTML = `
+                    <div class="card h-100">
+                        <div class="card-body">
+                            <small class="text-secondary">Código ${produto.codigoProduto}</small>
+                            <h6 class="mt-1">${produto.descricaoProduto}</h6>
+                            <div class="estoque-quantidade mt-3">${produto.estoque}</div>
+                            <small class="text-secondary">unidades em estoque</small>
+                        </div>
+                    </div>
+                `;
+
+                container.appendChild(col);
+            });
+        }
+
+        function registrarMovimentacao() {
+            const produto = estoque.find(item => item.codigoProduto == produtoEstoque.value);
+            const tipo = document.getElementById('tipoMovimentacao');
+            const quantidade = document.getElementById('quantidadeMovimentacao');
+            const descricao = document.getElementById('descricaoMovimentacao');
+
+            let valido = true;
+
+            [produtoEstoque, tipo, quantidade, descricao].forEach(campo => {
+                limparValidacao(campo);
+            });
+
+            if (!produto) {
+                produtoEstoque.classList.add('is-invalid');
+                valido = false;
+            }
+
+            if (!tipo.value) {
+                tipo.classList.add('is-invalid');
+                valido = false;
+            }
+
+            const qtd = Number(quantidade.value);
+
+            if (!Number.isInteger(qtd) || qtd <= 0) {
+                quantidade.classList.add('is-invalid');
+                valido = false;
+            }
+
+            if (!descricao.value.trim()) {
+                descricao.classList.add('is-invalid');
+                valido = false;
+            }
+
+            if (!valido) {
+                mostrarAlerta(document.getElementById('alertaEstoque'), 'Preencha corretamente todos os campos da movimentação.');
+
+                return;
+            }
+
+            if (tipo.value === 'saida' && qtd > produto.estoque) {
+                mostrarAlerta(document.getElementById('alertaEstoque'), `
+                        Não é possível realizar a saída de
+                        <strong>${qtd}</strong> unidades.
+                        O produto possui somente
+                        <strong>${produto.estoque}</strong>
+                        unidades em estoque.
+                    `
+                );
+
+                return;
+            }
+
+            if (tipo.value === 'entrada') {
+                produto.estoque += qtd;
+            } else {
+                produto.estoque -= qtd;
+            }
+
+            const movimentacao = {
+                id           : proximoIdMovimentacao++,
+                codigoProduto: produto.codigoProduto,
+                produto      : produto.descricaoProduto,
+                tipo         : tipo.value,
+                quantidade   : qtd,
+                descricao    : descricao.value.trim(),
+                estoqueFinal : produto.estoque,
+                data         : new Date()
+            };
+
+            movimentacoes.push(movimentacao);
+
+            renderizarEstoque();
+            renderizarMovimentacoes();
+
+            mostrarAlerta(
+                document.getElementById('alertaEstoque'),
+                `
+                    Movimentação registrada com sucesso!
+                    O estoque de
+                    <strong>${produto.descricaoProduto}</strong>
+                    agora é de
+                    <strong>${produto.estoque}</strong>
+                    unidades.
+                `,
+                'success'
+            );
+
+            produtoEstoque.value = '';
+            tipo.value           = '';
+            quantidade.value     = '';
+            descricao.value      = '';
+        }
+
+
+        function renderizarMovimentacoes() {
+            const tbody = document.getElementById('tabelaMovimentacoes');
+
+            tbody.innerHTML = '';
+
+            movimentacoes.slice().reverse().forEach(mov => {
+                const tr = document.createElement('tr');
+                const badgeTipo = mov.tipo === 'entrada' ? 'success' : 'danger';
+                const sinal = mov.tipo === 'entrada' ? '+' : '-';
+
+                tr.innerHTML = `
+                    <td><span class="badge text-bg-secondary">#${mov.id}</span></td>
+                    <td>${mov.produto}</td>
+                    <td><span class="badge text-bg-${badgeTipo}">${mov.tipo.toUpperCase()}</span></td>
+                    <td>${sinal}${mov.quantidade}</td>
+                    <td>${mov.descricao}</td>
+                    <td><strong>${mov.estoqueFinal}</strong></td>
+                `;
+
+                tbody.appendChild(tr);
+            });
+        }
+
+        document.getElementById('btnMovimentar').addEventListener('click', registrarMovimentacao);
+
+        carregarProdutos();
+        renderizarEstoque();
+
+        /* =========================================================
+        DESAFIO 3
+        JUROS
+        ========================================================= */
+
+        document.getElementById('btnCalcularJuros').addEventListener('click', calcularJuros);
+
+        function calcularJuros() {
+            const valorInput     = document.getElementById('valorDivida');
+            const dataInput      = document.getElementById('dataVencimento');
+            const valor          = Number(valorInput.value);
+            const dataVencimento = dataInput.value;
+
+            limparValidacao(valorInput);
+            limparValidacao(dataInput);
+
+            let valido = true;
+
+            if (!Number.isFinite(valor) || valor <= 0) {
+                valorInput.classList.add('is-invalid');
+                valido = false;
+            }
+
+            if (!dataVencimento) {
+                dataInput.classList.add('is-invalid');
+                valido = false;
+            }
+
+            if (!valido) {
+                mostrarAlerta(document.getElementById('alertaJuros'), 'Informe corretamente o valor e a data de vencimento.');
+
+                return;
+            }
+
+            /*
+            * Criamos as datas considerando somente
+            * ano/mês/dia para evitar problemas de horário.
+            */
+
+            const vencimento     = criarDataLocal(dataVencimento);
+            const hoje           = new Date();
+            const hojeSemHorario = new Date(hoje.getFullYear(), hoje.getMonth(), hoje.getDate());
+            const diferenca      = hojeSemHorario.getTime() - vencimento.getTime();
+            const diasAtraso     = Math.max(0, Math.floor(diferenca / (1000 * 60 * 60 * 24)));
+            /*
+            * Juros simples: 
+            *
+            * juros = valor × taxa diária × dias
+            */
+            const juros      = valor * TAXA_JUROS_DIA * diasAtraso;
+            const valorFinal = valor + juros;
+
+            document.getElementById('resultadoValorOriginal').textContent = formatarMoeda(valor);
+            document.getElementById('resultadoDias').textContent          = diasAtraso;
+            document.getElementById('resultadoJurosValor').textContent    = formatarMoeda(juros);
+            document.getElementById('resultadoValorFinal').textContent    = formatarMoeda(valorFinal);
+            document.getElementById('resultadoJuros').classList.remove('d-none');
+
+            const mensagem = diasAtraso > 0 ? `
+                Vencimento em
+                <strong>${formatarData(vencimento)}</strong>.
+                Existem
+                <strong>${diasAtraso} dias</strong>
+                de atraso.
+            ` : `
+                O pagamento ainda não está em atraso.
+                Nenhuma multa foi aplicada.
+            `;
+
+            mostrarAlerta(document.getElementById('alertaJuros'), mensagem, diasAtraso > 0 ? 'warning' : 'success');
+        }
+
+        function criarDataLocal(data) {
+            const partes = data.split('-').map(Number);
+
+            return new Date(partes[0], partes[1] - 1, partes[2]);
+        }
+
+        function formatarData(data) {
+            return data.toLocaleDateString('pt-BR');
+        }
+    </script>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
